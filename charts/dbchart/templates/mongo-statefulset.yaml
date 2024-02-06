@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+  namespace: challenge
+spec:
+  selector:
+    matchLabels:
+      role: database
+  serviceName: mongo
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        role: database
+        env: challenge
+        replicatset: rs0.main
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: replicatset
+                      operator: In
+                      values:
+                        - rs0.main
+                topologyKey: kubernetes.io/hostname
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: mongo
+        image: mongo:4.2
+        command:
+          - "numactl"
+          - "--interleave=all"
+          - "mongod"
+          - "--wiredTigerCacheSizeGB"
+          - "0.1"
+          - "--bind_ip"
+          - "0.0.0.0"
+          - "--replSet"
+          - "rs0"
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongo-storage
+          mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-storage
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: gp2
+        resources:
+          requests:
+            storage: 0.5Gi

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+  namespace: challenge
+data:
+  key: api-url
+  value: $API_ELB_PUBLIC_FQDN

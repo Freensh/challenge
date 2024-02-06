@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+  namespace: challenge
+  labels:
+    role: api
+data:
+  key: api-url
+  value: a98e1d5370b714f3795fa72696352b36-499522187.us-east-2.elb.amazonaws.com
